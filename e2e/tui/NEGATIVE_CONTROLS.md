@@ -10138,3 +10138,14 @@ origin/main at ecdeec289.
 | The branch before this review (c7fe27eed) | "the client kept its own order after the daemon answered" | **caught** |
 | The reply comparing against the drawn order (`sidebarSessionOrderFor`) | the same | **caught** |
 | The pending move and the daemon's order out of the rail cache key | none: another change (the cursor) redraws the rail in time in every run | **not caught** |
+## Session listing push on a session change
+
+`TestRailRightClickKillsTheSessionUnderThePointer` kills `bravo` from the rail. Then it runs `tuios new charlie --detach` and `tuios kill-session charlie`. After each command, with no key or click, the rail must show the change within 1.5 seconds (issue #1225). The kill of `bravo` and the creation of `charlie` each send a listing push just before the next command. Run on 2026-10-27 on Linux, on branch `fix/listing-push-on-session-change` from `main` (`3d91716c0`).
+
+| Control: what was cut | Where it fails | Verdict |
+| --- | --- | --- |
+| None: `main` itself | "the rail showed charlie gone 2.953s after the command returned" | **caught** |
+| A session change never brings an armed timer forward (`if armed {` for `if armed && !armedAt.After(at) {` in `listingNotifier`) | "the rail showed charlie gone 2.946s after the command returned" | **caught** |
+| The positive half | none: three runs showed charlie in 100 to 103 ms and charlie gone in 102 to 103 ms | **guard** |
+
+With `TUIOS_E2E_FRAMES` set, the test writes `charlie-made.png` and `charlie-gone.png`.
